@@ -1,16 +1,18 @@
-const dns = require("dns");
-
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
-
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
+const dns = require("dns");
+
+dotenv.config();
+
+
+if (process.env.NODE_ENV !== "production") {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+}
 
 const connectDB = require("./config/db");
 const feedbackRoutes = require("./routes/feedbackRoutes");
-
-dotenv.config();
 
 const app = express();
 
@@ -30,10 +32,17 @@ app.get("/", (req, res) => {
 
 connectDB()
   .then(() => {
-    app.listen(5000, () => {
-      console.log("Server running at http://localhost:5000");
-    });
+    console.log("MongoDB connected");
   })
   .catch((error) => {
-    console.error("Failed to start server:", error.message);
+    console.error("MongoDB connection failed:", error.message);
   });
+
+if (process.env.NODE_ENV !== "production") {
+  app.listen(5000, () => {
+    console.log("Server running at http://localhost:5000");
+  });
+}
+
+
+module.exports = app;
